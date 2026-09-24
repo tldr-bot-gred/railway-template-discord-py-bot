@@ -257,4 +257,4 @@ class Bot(discord.Client):
                 "2h": timedelta(hours=2),
                 "4h": timedelta(hours=4),
                 "8h": timedelta(hours=8),
-                "12h": timedelta(hours
+                "12h": timedelta(hours)
