@@ -170,7 +170,7 @@ class Bot(discord.Client):
                 )
                 return
 
-                        conversation = "\n".join(messages)
+            conversation = "\n".join(messages)
 
             try:
                 summary = await summarize_conversation(conversation)
