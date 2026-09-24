@@ -50,7 +50,7 @@ def start_health_server(
     *,
     host: str | None = None,
     port: int | None = None,
-) -> tuple[ThreadingHTTPServer, Thread\]:
+):
 
     class HealthHandler(BaseHTTPRequestHandler):
 
