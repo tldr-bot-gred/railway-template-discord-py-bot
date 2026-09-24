@@ -15,6 +15,7 @@ from typing import Callable
 
 import discord
 from discord import app_commands
+from summarizer import summarize_conversation
 
 logging.basicConfig(
     level=logging.INFO,
