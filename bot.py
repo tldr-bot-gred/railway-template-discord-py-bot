@@ -8,6 +8,7 @@ import logging
 import math
 import os
 import signal
+from datetime import timedelta
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from threading import Thread
 from typing import Callable
@@ -100,7 +101,59 @@ class Bot(discord.Client):
                 f"discord.py `{discord.__version__}` · `{self.user}`",
                 ephemeral=True,
             )
+        @self.tree.command(
+            name="tldr",
+            description="Summarize recent messages in this channel",
+        )
+        @app_commands.describe(
+            timeframe="How far back should I read?"
+        )
+        @app_commands.choices(
+            timeframe=[
+                app_commands.Choice(name="Last 30 minutes", value="30m"),
+                app_commands.Choice(name="Last 1 hour", value="1h"),
+                app_commands.Choice(name="Last 2 hours", value="2h"),
+                app_commands.Choice(name="Last 4 hours", value="4h"),
+                app_commands.Choice(name="Last 8 hours", value="8h"),
+                app_commands.Choice(name="Last 12 hours", value="12h"),
+                app_commands.Choice(name="Last 24 hours", value="24h"),
+                app_commands.Choice(name="Last 3 days", value="3d"),
+                app_commands.Choice(name="Last 7 days", value="7d"),
+            ]
+        )
+        async def tldr(
+            interaction: discord.Interaction,
+            timeframe: app_commands.Choice[str],
+        ) -> None:
 
+            await interaction.response.defer(
+                ephemeral=True,
+                thinking=True,
+            )
+
+            channel = interaction.channel
+
+            if channel is None or not hasattr(channel, "history"):
+                await interaction.followup.send(
+                    "This command can only be used inside a Discord channel.",
+                    ephemeral=True,
+                )
+                return
+
+            timeframe_map = {
+                "30m": timedelta(minutes=30),
+                "1h": timedelta(hours=1),
+                "2h": timedelta(hours=2),
+                "4h": timedelta(hours=4),
+                "8h": timedelta(hours=8),
+                "12h": timedelta(hours=12),
+                "24h": timedelta(hours=24),
+                "3d": timedelta(days=3),
+                "7d": timedelta(days=7),
+            }
+
+            delta = timeframe_map[timeframe.value]
+            after = discord.utils.utcnow() -         
         @self.tree.error
         async def command_error(interaction: discord.Interaction, error: app_commands.AppCommandError) -> None:
             log.error("Slash command failed (%s)", type(error).__name__)
