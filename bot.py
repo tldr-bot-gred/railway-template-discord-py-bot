@@ -153,7 +153,28 @@ class Bot(discord.Client):
             }
 
             delta = timeframe_map[timeframe.value]
-            after = discord.utils.utcnow() -         
+            after = discord.utils.utcnow() - delta
+
+            messages = []
+            async for message in channel.history(after=after, oldest_first=True):
+                if message.author.bot:
+                    continue
+                if message.content:
+                    messages.append(f"{message.author.display_name}: {message.content}")
+
+            if not messages:
+                await interaction.followup.send(
+                    "No messages found in that timeframe.",
+                    ephemeral=True,
+                )
+                return
+
+            summary_preview = "\n".join(messages[-20:])
+            await interaction.followup.send(
+                f"Collected {len(messages)} message(s) from the selected timeframe:\n```\n{summary_preview}\n```",
+                ephemeral=True,
+            )
+
         @self.tree.error
         async def command_error(interaction: discord.Interaction, error: app_commands.AppCommandError) -> None:
             log.error("Slash command failed (%s)", type(error).__name__)
