@@ -170,9 +170,30 @@ class Bot(discord.Client):
                 )
                 return
 
-            summary_preview = "\n".join(messages[-20:])
+                        conversation = "\n".join(messages)
+
+            try:
+                summary = await summarize_conversation(conversation)
+
+            except Exception:
+                log.exception("AI summarization failed")
+
+                await interaction.followup.send(
+                    "❌ Δεν μπόρεσα να δημιουργήσω το TL;DR αυτή τη στιγμή. "
+                    "Δοκίμασε ξανά σε λίγο.",
+                    ephemeral=True,
+                )
+                return
+
+            response = (
+                f"🤖 **TL;DR • {timeframe.name}**\n\n"
+                f"{summary}\n\n"
+                f"──────────────\n"
+                f"💬 {len(messages)} messages"
+            )
+
             await interaction.followup.send(
-                f"Collected {len(messages)} message(s) from the selected timeframe:\n```\n{summary_preview}\n```",
+                response,
                 ephemeral=True,
             )
 
