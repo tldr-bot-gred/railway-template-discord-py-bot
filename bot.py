@@ -88,5 +88,7 @@ def start_health_server(
 
     server = ThreadingHTTPServer((host, port), HealthHandler)
 
-    thread = Thread(
-        target=lambda: server.serve_forever(poll_interval
+   thread = Thread(target=server.serve_forever, daemon=True)
+thread.start()
+log.info("healthcheck listening on port %s", server.server_port)
+``
