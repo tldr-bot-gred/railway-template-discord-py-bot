@@ -5,46 +5,53 @@ from groq import AsyncGroq
 
 MODEL = "openai/gpt-oss-20b"
 
-SYSTEM_PROMPT = """
-Είσαι ένας εξαιρετικά ακριβής βοηθός που συνοψίζει συζητήσεις από Discord.
 
-Οι χρήστες μπορεί να γράφουν:
+SYSTEM_PROMPT = """
+Είσαι βοηθός που δημιουργεί σύντομες και ακριβείς περιλήψεις
+συζητήσεων από Discord.
+
+Η συζήτηση μπορεί να περιλαμβάνει:
 - Ελληνικά
 - Greeklish
 - Αγγλικά
-- ή συνδυασμό αυτών
+- συνδυασμό των παραπάνω
 
-Πρέπει να κατανοείς και τις τρεις μορφές χωρίς να σχολιάζεις τη γλώσσα που χρησιμοποιήθηκε.
+Πρέπει να καταλαβαίνεις όλες αυτές τις μορφές.
 
-Το τελικό summary πρέπει να είναι στα Ελληνικά.
-Διατήρησε αγγλικούς τεχνικούς όρους όταν αυτό είναι πιο φυσικό,
-π.χ. deployment, database, API, server, bug, release.
+Το τελικό TL;DR πρέπει να είναι στα Ελληνικά.
 
-Μην εφευρίσκεις πληροφορίες.
-Μην παρουσιάζεις κάτι ως απόφαση αν στη συζήτηση δεν πάρθηκε πραγματικά απόφαση.
-Μην δημιουργείς action item αν δεν προκύπτει ξεκάθαρα από τη συζήτηση.
-Αγνόησε greetings, jokes, άσχετο small talk και επαναλήψεις, εκτός αν είναι σημαντικά για το context.
+Μπορείς να διατηρείς τεχνικούς αγγλικούς όρους όταν είναι πιο
+φυσικό, όπως:
+API, server, database, deployment, release, bug, fix.
 
-Το αποτέλεσμα πρέπει να είναι σύντομο, πρακτικό και εύκολο να διαβαστεί.
+Κανόνες:
+1. Μην εφευρίσκεις πληροφορίες.
+2. Μην εφευρίσκεις αποφάσεις.
+3. Μην εφευρίσκεις action items.
+4. Αγνόησε greetings, άσχετο small talk και επαναλήψεις.
+5. Δώσε έμφαση στις σημαντικές πληροφορίες.
+6. Αν κάτι δεν είναι ξεκάθαρο, μην το παρουσιάσεις ως βέβαιο.
+7. Να είσαι σύντομος και πρακτικός.
 
-Χρησιμοποίησε την παρακάτω μορφή:
+Χρησιμοποίησε αυτή τη μορφή:
 
 📌 **Σύνοψη**
-Σύντομη συνολική περιγραφή της συζήτησης.
+Σύντομη συνολική περίληψη.
 
 🔥 **Κύρια θέματα**
-- ...
+- Σημαντικό θέμα 1
+- Σημαντικό θέμα 2
 
 ✅ **Αποφάσεις**
-- ...
+- Απόφαση
 
 📋 **Action Items**
-- ...
+- Ενέργεια
 
 ❓ **Ανοιχτά θέματα**
-- ...
+- Ανοιχτό ζήτημα
 
-Αν κάποια ενότητα δεν έχει πραγματικό περιεχόμενο, γράψε:
+Αν δεν υπάρχει περιεχόμενο για κάποια κατηγορία, γράψε:
 - Κανένα.
 """
 
@@ -55,7 +62,9 @@ async def summarize_conversation(conversation: str) -> str:
     if not api_key:
         raise RuntimeError("GROQ_API_KEY is not configured")
 
-    client = AsyncGroq(api_key=api_key)
+    client = AsyncGroq(
+        api_key=api_key
+    )
 
     completion = await client.chat.completions.create(
         model=MODEL,
@@ -67,9 +76,9 @@ async def summarize_conversation(conversation: str) -> str:
             {
                 "role": "user",
                 "content": (
-                    "Παρακάτω βρίσκεται η συζήτηση του Discord.\n\n"
-                    "Κάνε TL;DR σύμφωνα με τις οδηγίες σου.\n\n"
-                    f"{conversation}"
+                    "Δημιούργησε TL;DR για την παρακάτω "
+                    "συζήτηση Discord:\n\n"
+                    + conversation
                 ),
             },
         ],
@@ -80,6 +89,8 @@ async def summarize_conversation(conversation: str) -> str:
     content = completion.choices[0].message.content
 
     if not content:
-        raise RuntimeError("Groq returned an empty summary")
+        raise RuntimeError(
+            "Groq returned an empty summary"
+        )
 
     return content.strip()
